@@ -7,10 +7,27 @@
   <title>BOARD · Roadmap & Forecast</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e8bf69'/%3E%3Ctext x='8' y='24' font-family='sans-serif' font-size='24' fill='%23111218'%3EB%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <script src="auth.js" defer></script>
   <script src="forecast.js" defer></script>
   <script src="app.js" defer></script>
 </head>
-<body>
+<body class="locked">
+  <section id="login-screen" class="login-screen" aria-hidden="true">
+    <form id="login-form" class="login-card">
+      <p class="eyebrow">BOARD · DOSTĘP CHRONIONY</p>
+      <h1>Zaloguj się</h1>
+      <p class="muted">Podaj dane dostępowe, aby wejść do roadmapy.</p>
+      <label class="field" for="login-username">Login
+        <input id="login-username" name="username" autocomplete="username" required>
+      </label>
+      <label class="field" for="login-password">Hasło
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <p id="login-error" class="login-error" role="alert" hidden>Nieprawidłowy login lub hasło.</p>
+      <button type="submit" class="primary">Zaloguj</button>
+    </form>
+  </section>
+  <div id="app">
   <header class="app-header">
     <a class="brand" href="./"><span class="brand-mark">B</span> BOARD <span class="brand-sub">/ planning studio</span></a>
     <span class="pill">MULTI-TEAM ROADMAP</span>
@@ -63,5 +80,6 @@
     </section>
     <footer><span>BOARD <span class="muted">/ Roadmap & Forecast</span></span><button id="reset-button" class="subtle">Przywróć dane przykładowe</button></footer>
   </main>
+  </div>
 </body>
 </html>
