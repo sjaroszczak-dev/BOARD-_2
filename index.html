@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111218">
+  <title>BOARD · Roadmap & Forecast</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e8bf69'/%3E%3Ctext x='8' y='24' font-family='sans-serif' font-size='24' fill='%23111218'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="forecast.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./"><span class="brand-mark">B</span> BOARD <span class="brand-sub">/ planning studio</span></a>
+    <span class="pill">MULTI-TEAM ROADMAP</span>
+  </header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">OD STRATEGII DO DOSTARCZENIA</p><h1>Plan oparty na <em>możliwościach.</em></h1>
+      <p class="muted">Wiele zespołów. Wspólne priorytety. Jedna roadmapa z prognozą P85.</p></div>
+      <button id="forecast-button" class="primary">Przelicz prognozę ↗</button>
+    </section>
+    <div class="toolbar">
+      <nav role="tablist" aria-label="Dashboard">
+        <button role="tab" id="tab-roadmap" aria-controls="panel-roadmap" aria-selected="true" data-tab="roadmap">01 <span>Roadmapa</span></button>
+        <button role="tab" id="tab-initiatives" aria-controls="panel-initiatives" aria-selected="false" tabindex="-1" data-tab="initiatives">02 <span>Inicjatywy</span></button>
+        <button role="tab" id="tab-capacity" aria-controls="panel-capacity" aria-selected="false" tabindex="-1" data-tab="capacity">03 <span>Zespoły i capacity</span></button>
+      </nav>
+      <span id="save-status" class="muted" role="status">Dane zapisywane lokalnie</span>
+    </div>
+    <div id="message" role="status" aria-live="polite" hidden></div>
+    <section id="panel-roadmap" role="tabpanel" aria-labelledby="tab-roadmap">
+      <div id="metrics" class="metrics"></div>
+      <section class="card">
+        <div class="section-heading"><div><p class="eyebrow">HORYZONT · 12 MIESIĘCY</p><h2>Roadmapa dostarczenia</h2></div><span class="pill gold">MONTE CARLO · P85</span></div>
+        <p class="muted small">Kolejność inicjatyw określa priorytet przy współdzieleniu capacity. Elementy w inicjatywie są realizowane kolejno; różne inicjatywy mogą pracować równolegle.</p>
+        <div class="legend"><span><i class="legend-bar"></i> Okno P85</span><span><i class="legend-line"></i> Fixed date</span><span><i class="legend-dot"></i> Ryzyko terminu</span></div>
+        <div id="gantt" class="gantt-scroll" tabindex="0" aria-label="Wykres Gantta"></div>
+        <div id="forecast-results"></div>
+      </section>
+      <details class="card methodology">
+        <summary>Jak czytać prognozę?</summary>
+        <p>Estymaty min/max to dni pracy przy pełnym zaangażowaniu danej kompetencji, nie dni kalendarzowe. W każdej z 1200 symulacji losujemy nakład z rozkładu jednostajnego min–max. Miesięczne capacity zespołu i kompetencji dzielimy równo pomiędzy dni poniedziałek–piątek; święta nie są uwzględniane.</p>
+        <p>Elementy konkurują o tę samą pulę zespół × kompetencja. Kolejny element inicjatywy może ruszyć najwcześniej w następnym dniu roboczym po ukończeniu poprzednika. Różne kompetencje mają niezależne pule — nie wpisuj tych samych dni osoby w kilku pulach. P85 oznacza datę, do której element kończy się w co najmniej 85% symulacji. Pasek pokazuje percentyl 85 daty startu i końca; nie jest przedziałem ufności.</p>
+        <p>Fixed date jest terminem docelowym, a nie gwarancją ani rezerwacją capacity. Pokazujemy prawdopodobieństwo jego dotrzymania. Nieukończone przebiegi liczą się jako niedotrzymanie terminu w horyzoncie; dla terminów poza horyzontem wynik nie jest wyznaczany. Jeśli P85 wykracza poza kalendarz, wskazujemy brak prognozy w horyzoncie zamiast wymyślać datę. Daty z przeszłości są przesuwane do dziś.</p>
+        <p>To narzędzie planistyczne, nie zobowiązanie dostarczenia. Wyniki zmieniają się pomiędzy przeliczeniami. Dane pozostają w tej przeglądarce — nie są synchronizowane ani wysyłane na serwer.</p>
+      </details>
+    </section>
+    <section id="panel-initiatives" role="tabpanel" aria-labelledby="tab-initiatives" hidden>
+      <div class="section-heading"><div><p class="eyebrow">PORTFEL INICJATYW</p><h2>Co chcemy dostarczyć?</h2></div><button class="primary" data-action="add-initiative">+ Dodaj inicjatywę</button></div>
+      <p class="muted">Zaznacz potrzebne kompetencje i dodaj dla każdej co najmniej jeden element z zespołem oraz estymatą. Min. 2 inicjatywy. Strzałki zmieniają priorytet lub kolejność realizacji.</p>
+      <div id="initiatives"></div>
+    </section>
+    <section id="panel-capacity" role="tabpanel" aria-labelledby="tab-capacity" hidden>
+      <section class="card"><div class="section-heading"><div><p class="eyebrow">KATALOG KOMPETENCJI</p><h2>Kompetencje</h2></div></div>
+        <div id="skills" class="skill-list"></div>
+        <form id="skill-form" class="inline-form"><label for="skill-name" class="sr-only">Nazwa nowej kompetencji</label><input id="skill-name" maxlength="80" placeholder="Nowa kompetencja" required><button type="submit">+ Dodaj kompetencję</button></form>
+      </section>
+      <div class="section-heading"><div><p class="eyebrow">ZASOBY I DOSTĘPNOŚĆ</p><h2>Zespoły i kalendarz capacity</h2></div><button class="primary" data-action="add-team">+ Dodaj zespół</button></div>
+      <p class="muted">Dni pracy / miesiąc / kompetencja. 20 dni to w przybliżeniu jedna osoba na pełen etat. Zero oznacza brak dostępności. „Klonuj →” kopiuje cały miesiąc danego zespołu do wszystkich kolejnych miesięcy kalendarza.</p>
+      <div id="teams"></div>
+    </section>
+    <footer><span>BOARD <span class="muted">/ Roadmap & Forecast</span></span><button id="reset-button" class="subtle">Przywróć dane przykładowe</button></footer>
+  </main>
+</body>
+</html>
