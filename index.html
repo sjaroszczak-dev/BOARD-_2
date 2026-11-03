@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOARD — Roadmap &amp; Capacity Forecast</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">BOARD</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Główna nawigacja">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="tab-roadmap">Roadmap i Prognoza</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-roadmap" class="tab-panel active" role="tabpanel">
+
+      <div class="toolbar">
+        <div class="toolbar-title">
+          <h1>Roadmap &amp; Capacity Forecast</h1>
+          <p class="subtitle">Planowanie wielu zespołów i inicjatyw z prognozą Monte Carlo (P85)</p>
+        </div>
+        <div class="toolbar-actions">
+          <button id="btn-export" class="btn btn-ghost" title="Eksportuj dane do pliku JSON">Eksportuj</button>
+          <label class="btn btn-ghost file-btn" title="Importuj dane z pliku JSON">
+            Importuj
+            <input type="file" id="btn-import" accept="application/json" hidden>
+          </label>
+          <button id="btn-reset" class="btn btn-danger" title="Wyczyść wszystkie dane">Wyczyść</button>
+        </div>
+      </div>
+
+      <div class="grid-layout">
+
+        <!-- Competencies -->
+        <section class="card" id="card-competencies">
+          <h2>Kompetencje</h2>
+          <div class="chips" id="competency-chips"></div>
+          <form id="form-add-competency" class="inline-form">
+            <input type="text" id="input-competency" placeholder="Nowa kompetencja (np. QA)" required>
+            <button type="submit" class="btn btn-gold">Dodaj</button>
+          </form>
+        </section>
+
+        <!-- Teams -->
+        <section class="card" id="card-teams">
+          <h2>Zespoły</h2>
+          <form id="form-add-team" class="inline-form">
+            <input type="text" id="input-team-name" placeholder="Nazwa zespołu" required>
+            <div class="checkbox-row" id="team-competency-checks"></div>
+            <button type="submit" class="btn btn-gold">Dodaj zespół</button>
+          </form>
+          <div class="list" id="teams-list"></div>
+        </section>
+
+        <!-- Initiatives -->
+        <section class="card" id="card-initiatives">
+          <h2>Inicjatywy</h2>
+          <form id="form-add-initiative" class="inline-form">
+            <input type="text" id="input-initiative-name" placeholder="Nazwa inicjatywy" required>
+            <div class="checkbox-row" id="initiative-competency-checks"></div>
+            <button type="submit" class="btn btn-gold">Dodaj inicjatywę</button>
+          </form>
+          <div class="list" id="initiatives-list"></div>
+          <p class="hint" id="initiative-count-hint"></p>
+        </section>
+
+        <!-- Capacity calendar -->
+        <section class="card card-wide" id="card-capacity">
+          <h2>Kalendarz pojemności (capacity) — 12 miesięcy</h2>
+          <div class="capacity-controls">
+            <label>Zespół:
+              <select id="capacity-team-select"></select>
+            </label>
+            <label>Kompetencja:
+              <select id="capacity-competency-select"></select>
+            </label>
+          </div>
+          <div class="table-wrap">
+            <table id="capacity-table" class="capacity-table"></table>
+          </div>
+        </section>
+
+        <!-- Items / estimates -->
+        <section class="card card-wide" id="card-items">
+          <h2>Elementy inicjatyw — estymaty i daty</h2>
+          <form id="form-add-item" class="item-form">
+            <select id="item-initiative" required></select>
+            <input type="text" id="item-name" placeholder="Nazwa elementu" required>
+            <select id="item-competency" required></select>
+            <select id="item-team" required></select>
+            <label>Min (jedn. capacity)<input type="number" id="item-min" min="0" step="0.5" value="5" required></label>
+            <label>Max (jedn. capacity)<input type="number" id="item-max" min="0" step="0.5" value="10" required></label>
+            <label>Data startu<input type="date" id="item-start" required></label>
+            <label class="checkbox-inline"><input type="checkbox" id="item-fixed-enabled"> Fixed date</label>
+            <input type="date" id="item-fixed-date" disabled>
+            <button type="submit" class="btn btn-gold">Dodaj element</button>
+          </form>
+          <div class="table-wrap">
+            <table id="items-table" class="items-table"></table>
+          </div>
+        </section>
+
+        <!-- Gantt -->
+        <section class="card card-wide" id="card-gantt">
+          <div class="gantt-header">
+            <h2>Gantt — prognoza Monte Carlo (P85)</h2>
+            <div class="legend">
+              <span class="legend-item"><i class="swatch swatch-p50"></i> P50</span>
+              <span class="legend-item"><i class="swatch swatch-p85"></i> P85 (zakres: start → P85)</span>
+              <span class="legend-item"><i class="swatch swatch-risk"></i> Ryzyko (po fixed date)</span>
+              <span class="legend-item"><i class="swatch swatch-fixed"></i> Fixed date</span>
+            </div>
+          </div>
+          <div class="table-wrap gantt-wrap">
+            <svg id="gantt-svg" width="100%"></svg>
+          </div>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>BOARD · dane zapisywane lokalnie w przeglądarce (localStorage) · gotowe pod GitHub Pages</span>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
