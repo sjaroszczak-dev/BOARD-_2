@@ -8,8 +8,8 @@
   const id = () => crypto.randomUUID();
   const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
   const dateLabel = (value) => Number.isFinite(value) ? new Intl.DateTimeFormat("pl-PL", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" }).format(new Date(value * F.DAY)) : "Poza horyzontem";
-  const percent = (value) => `${Math.round(value * 100)}%`;
-  const calendar = F.months(today());
+  const percent = (value) => new Intl.NumberFormat("pl-PL", { style: "percent", maximumFractionDigits: 1 }).format(value);
+  let calendar = F.months(today());
   const monthLabel = (month) => new Intl.DateTimeFormat("pl-PL", { timeZone: "UTC", month: "short", year: "2-digit" }).format(new Date(month.start * F.DAY));
   const storageKey = "board-roadmap-v1";
   let forecast = null;
@@ -79,6 +79,15 @@
     renderRoadmap();
   }
 
+  function refreshCalendar() {
+    const next = F.months(today());
+    if (next[0].key === calendar[0].key) return;
+    calendar = next;
+    changed();
+    render();
+    message("Nowy miesiąc: kalendarz odświeżony. Uzupełnij capacity ostatniego miesiąca i przelicz prognozę.");
+  }
+
   const input = (label, value, field, entity, type = "text") => `<label class="field">${escape(label)}<input type="${type}" value="${escape(value)}" data-field="${field}" data-id="${entity}" ${type === "text" ? 'maxlength="160"' : ""}></label>`;
   const checks = (selected, type, entity) => `<div class="checks">${state.skills.map((skill) => `<label><input type="checkbox" data-check="${type}" data-id="${entity}" value="${skill.id}" ${selected.includes(skill.id) ? "checked" : ""}>${escape(skill.name)}</label>`).join("")}</div>`;
   const options = (entries, selected, placeholder) => `<option value="">${placeholder}</option>${entries.map((entry) => `<option value="${entry.id}" ${entry.id === selected ? "selected" : ""}>${escape(entry.name)}</option>`).join("")}`;
@@ -144,10 +153,11 @@
       document.getElementById("forecast-results").innerHTML = "";
       return;
     }
-    const first = calendar[0].start;
-    const last = calendar[11].end;
+    const chartCalendar = forecast.calendar;
+    const first = chartCalendar[0].start;
+    const last = chartCalendar[11].end;
     const position = (day) => (day - first) / (last - first) * 100;
-    const grid = calendar.map((month) => `<span class="month-cell" style="left:${position(month.start)}%;width:${position(month.end) - position(month.start)}%"></span>`).join("");
+    const grid = chartCalendar.map((month) => `<span class="month-cell" style="left:${position(month.start)}%;width:${position(month.end) - position(month.start)}%"></span>`).join("");
     const row = (name, subtitle, result, deadline, group = false) => {
       const risk = result.chance !== null && result.chance < .85;
       let bar = '<span class="overflow-label">P85 poza horyzontem — zwiększ capacity lub zmniejsz zakres</span>';
@@ -155,7 +165,7 @@
       const marker = deadline && F.day(deadline) >= first && F.day(deadline) < last ? `<span class="deadline" style="left:${position(F.day(deadline))}%" title="Fixed date: ${escape(deadline)}"></span>` : "";
       return `<div class="gantt-row ${group ? "gantt-group" : ""}"><div class="gantt-label">${escape(name)}<small>${escape(subtitle)}</small></div><div class="gantt-track">${grid}${bar}${marker}</div></div>`;
     };
-    let chart = `<div class="gantt"><div class="gantt-row"><div class="gantt-label muted">INICJATYWA / ELEMENT</div><div class="gantt-track">${calendar.map((month) => `<span class="month-cell month-title" style="left:${position(month.start)}%;width:${position(month.end) - position(month.start)}%">${escape(monthLabel(month))}</span>`).join("")}</div></div>`;
+    let chart = `<div class="gantt"><div class="gantt-row"><div class="gantt-label muted">INICJATYWA / ELEMENT</div><div class="gantt-track">${chartCalendar.map((month) => `<span class="month-cell month-title" style="left:${position(month.start)}%;width:${position(month.end) - position(month.start)}%">${escape(monthLabel(month))}</span>`).join("")}</div></div>`;
     const tableRows = [];
     const resultRow = (name, result, deadline) => {
       const chance = result.chance === null ? (deadline ? "Termin poza horyzontem" : "—") : percent(result.chance);
@@ -324,6 +334,7 @@
   });
 
   document.getElementById("forecast-button").addEventListener("click", async () => {
+    refreshCalendar();
     let model;
     try { model = F.prepare(state, today()); }
     catch (error) { message(error.message, true); return; }
@@ -346,7 +357,7 @@
       forecast = F.summarize(model, samples, state);
       renderRoadmap();
       switchTab("roadmap");
-      message(`✓ Przeliczono ${forecast.runs} scenariuszy. Kalendarz: ${monthLabel(calendar[0])} – ${monthLabel(calendar[11])}.`);
+      message(`✓ Przeliczono ${forecast.runs} scenariuszy. Kalendarz: ${monthLabel(forecast.calendar[0])} – ${monthLabel(forecast.calendar[11])}.`);
     } catch (error) { message(`Nie udało się obliczyć prognozy: ${error.message}`, true); }
     finally {
       if (token === generation) {
@@ -355,5 +366,8 @@
       }
     }
   });
+  window.addEventListener("focus", refreshCalendar);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshCalendar(); });
+  setInterval(refreshCalendar, 60000);
   render();
 })();

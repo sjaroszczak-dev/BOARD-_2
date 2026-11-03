@@ -70,9 +70,10 @@
         }
         if (item.start && !validDate(item.start)) errors.push(`${label}: niepoprawna data startu.`);
         if (item.deadline && !validDate(item.deadline)) errors.push(`${label}: niepoprawny fixed date.`);
-        const start = Math.max(day(today), day(initiative.start), item.start ? day(item.start) : -Infinity);
-        if (item.deadline && day(item.deadline) < start) errors.push(`${label}: fixed date jest przed datą startu.`);
-        if (initiative.deadline && day(initiative.deadline) < start) errors.push(`${prefix}: fixed date inicjatywy jest przed datą startu elementu.`);
+        const requestedStart = Math.max(day(initiative.start), item.start ? day(item.start) : -Infinity);
+        const start = Math.max(day(today), requestedStart);
+        if (item.deadline && day(item.deadline) < requestedStart) errors.push(`${label}: fixed date jest przed żądaną datą startu.`);
+        if (initiative.deadline && day(initiative.deadline) < requestedStart) errors.push(`${prefix}: fixed date inicjatywy jest przed żądaną datą startu elementu.`);
         tasks.push({ id: item.id, initiativeId: initiative.id, resource: `${item.teamId}/${item.skillId}`, min: item.min, max: item.max, start, predecessor });
         predecessor = tasks.length - 1;
       });

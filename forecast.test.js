@@ -120,6 +120,18 @@ test("deadlines and requested starts beyond the horizon are not falsely forecast
   assert.equal(result.initiatives.a.chance, null);
 });
 
+test("missed deadlines do not block forecasts when requested starts were valid", () => {
+  const state = fixture();
+  state.initiatives[0].start = "2025-12-01";
+  state.initiatives[0].deadline = "2025-12-31";
+  state.initiatives[0].items[0].deadline = "2025-12-31";
+  const model = F.prepare(state, TODAY);
+  const result = F.summarize(model, [F.run(model)], state);
+  assert.equal(result.initiatives.a.chance, 0);
+  assert.equal(result.items["a-1"].chance, 0);
+  assert.equal(F.iso(result.items["a-1"].start), TODAY);
+});
+
 test("portfolio finish uses the last element, not the earliest finish", () => {
   const state = fixture();
   state.initiatives[0].items.push({ ...state.initiatives[0].items[0], id: "a-2", deadline: "" });
