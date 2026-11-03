@@ -23,6 +23,9 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); }
 input[type="number"] { min-width: 72px; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .app-header { padding: 22px max(24px, calc((100vw - 1440px) / 2)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); gap: 16px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+#logout-button { display: none; }
+body.authenticated #logout-button { display: inline-flex; }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; font-weight: 800; letter-spacing: 2px; }
 .brand-mark { background: var(--gold); color: #201b11; border-radius: 8px; padding: 3px 12px; font-size: 24px; }
 .brand-sub { font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--muted); }

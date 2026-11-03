@@ -13,6 +13,15 @@
       .join("");
   }
 
+  // Usuwa ewentualny login/hasło, które mogłyby trafić do adresu URL
+  // (np. przez autouzupełnianie przeglądarki lub zapisaną starą wersję strony).
+  function sanitizeUrl() {
+    if (!location.search) return;
+    if (window.history && typeof window.history.replaceState === "function") {
+      window.history.replaceState(null, "", location.pathname + location.hash);
+    }
+  }
+
   function unlock() {
     document.body.classList.remove("locked");
     document.body.classList.add("authenticated");
@@ -20,7 +29,26 @@
     if (login) login.setAttribute("aria-hidden", "true");
   }
 
+  function lock() {
+    sessionStorage.removeItem(SESSION_KEY);
+    document.body.classList.remove("authenticated");
+    document.body.classList.add("locked");
+    const login = document.getElementById("login-screen");
+    const form = document.getElementById("login-form");
+    const error = document.getElementById("login-error");
+    if (login) login.removeAttribute("aria-hidden");
+    if (error) error.hidden = true;
+    if (form) form.reset();
+  }
+
   function init() {
+    sanitizeUrl();
+    const logoutButton = document.getElementById("logout-button");
+    if (logoutButton) {
+      logoutButton.addEventListener("click", () => {
+        lock();
+      });
+    }
     if (sessionStorage.getItem(SESSION_KEY) === "1") {
       unlock();
       return;
@@ -35,6 +63,7 @@
       const username = document.getElementById("login-username").value.trim();
       const password = document.getElementById("login-password").value;
       const hash = await sha256Hex(`${username}:${password}`);
+      sanitizeUrl();
       if (hash === CREDENTIALS_HASH) {
         sessionStorage.setItem(SESSION_KEY, "1");
         if (error) error.hidden = true;
